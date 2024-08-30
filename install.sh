@@ -199,6 +199,12 @@ python -m pip install wheel
 #if [ "$INSTALL_PYTHON_VERSION" = "3.8" ]; then
 # This remains in case there is a diversion of binary wheels
 python -m pip install --extra-index-url https://pypi.chia.net/simple/ miniupnpc==2.2.2
+VER=$(echo "$PY3_VER" | cut -d'.' -f1,2 | sed "s/\.*//g")
+if [[ `uname` == 'Darwin' ]]; then
+	python -m pip install https://github.com/goldcoin-gl/gold_rs/releases/download/0.9.0/gold_rs-0.9.0-cp${VER}-cp${VER}-macosx_10_12_x86_64.whl
+else
+	python -m pip install https://github.com/goldcoin-gl/gold_rs/releases/download/0.9.0/gold_rs-0.9.0-cp${VER}-cp${VER}-manylinux_2_28_x86_64.whl
+fi
 python -m pip install ${EDITABLE} ."${EXTRAS}" --extra-index-url https://pypi.chia.net/simple/
 
 if [ -n "$PLOTTER_INSTALL" ]; then

@@ -112,8 +112,12 @@ else
 
 py -$pythonVersion -m venv venv
 
+Write-Output "Python version is: $fullPythonVersion"
+$version=($fullPythonVersion.split(".")[0..1] -join "")
+Write-Output "Found Python with OpenSSL version: $version"
 venv\scripts\python -m pip install --upgrade pip setuptools wheel
 venv\scripts\pip install --extra-index-url https://pypi.chia.net/simple/ miniupnpc==2.2.2
+& venv\scripts\pip install https://github.com/goldcoin-gl/gold_rs/releases/download/0.9.0/gold_rs-0.9.0-cp${version}-none-win_amd64.whl
 & venv\scripts\pip install @pip_parameters --extra-index-url https://pypi.chia.net/simple/
 
 if ($p)
