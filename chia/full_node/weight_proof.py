@@ -1269,7 +1269,7 @@ def validate_recent_blocks(
             difficulty_coeff = Decimal(difficulty_coeffs[idx])
             if sub_slots > 2 and transaction_blocks > 11 and (tip_height - block.height < last_blocks_to_validate):
                 caluclated_required_iters, error = validate_finished_header_block(
-                    constants, sub_blocks, block, False, diff, ssi, Decimal("0.5"), ses_blocks > 2
+                    constants, sub_blocks, block, False, diff, ssi, difficulty_coeff, ses_blocks > 2
                 )
                 if error is not None:
                     log.error(f"block {block.header_hash} failed validation {error}")
@@ -1277,7 +1277,9 @@ def validate_recent_blocks(
                 assert caluclated_required_iters is not None
                 required_iters = caluclated_required_iters
             else:
-                ret = _validate_pospace_recent_chain(constants, block, challenge, diff, overflow, prev_challenge)
+                ret = _validate_pospace_recent_chain(
+                    constants, block, challenge, diff, overflow, prev_challenge, difficulty_coeff
+                )
                 if ret is None:
                     return False, []
                 required_iters = ret
@@ -1320,6 +1322,7 @@ def _validate_pospace_recent_chain(
     diff: uint64,
     overflow: bool,
     prev_challenge: bytes32,
+    difficulty_coeff: Decimal,
 ) -> Optional[uint64]:
     if block.reward_chain_block.challenge_chain_sp_vdf is None:
         # Edge case of first sp (start of slot), where sp_iters == 0
@@ -1342,7 +1345,7 @@ def _validate_pospace_recent_chain(
         q_str,
         block.reward_chain_block.proof_of_space.size,
         diff,
-        Decimal("0.5"),
+        difficulty_coeff,
         cc_sp_hash,
     )
     return required_iters

@@ -1137,6 +1137,7 @@ class WalletNode:
             return
 
         new_peak_hb: HeaderBlock = response.header_block
+        difficulty_coeff: Decimal = Decimal(response.difficulty_coeff)
         # check response is what we asked for
         if (
             new_peak_hb.header_hash != new_peak.header_hash
@@ -1162,7 +1163,7 @@ class WalletNode:
         if self.is_trusted(peer):
             await self.new_peak_from_trusted(new_peak_hb, latest_timestamp, peer)
         else:
-            if not await self.new_peak_from_untrusted(new_peak_hb, peer):
+            if not await self.new_peak_from_untrusted(new_peak_hb, difficulty_coeff, peer):
                 return
 
         if peer.peer_node_id in self.synced_peers:
@@ -1182,7 +1183,9 @@ class WalletNode:
             if peer.peer_node_id not in self.synced_peers:
                 await self.long_sync(new_peak_hb.height, peer, uint32(max(0, current_height - 256)), rollback=True)
 
-    async def new_peak_from_untrusted(self, new_peak_hb: HeaderBlock, peer: WSGoldConnection) -> bool:
+    async def new_peak_from_untrusted(
+            self, new_peak_hb: HeaderBlock, difficulty_coeff: Decimal, peer: WSGoldConnection
+    ) -> bool:
         far_behind: bool = (
             new_peak_hb.height - await self.wallet_state_manager.blockchain.get_finished_sync_up_to()
             > self.LONG_SYNC_THRESHOLD
@@ -1190,12 +1193,12 @@ class WalletNode:
 
         if new_peak_hb.height < self.constants.WEIGHT_PROOF_RECENT_BLOCKS:
             # this is the case happens chain is shorter then WEIGHT_PROOF_RECENT_BLOCKS
-            return await self.sync_from_untrusted_close_to_peak(new_peak_hb, peer)
+            return await self.sync_from_untrusted_close_to_peak(new_peak_hb, difficulty_coeff, peer)
 
         if not far_behind and peer.peer_node_id in self.synced_peers:
             # This is the (untrusted) case where we already synced and are not too far behind. Here we just
             # fetch one by one.
-            return await self.sync_from_untrusted_close_to_peak(new_peak_hb, peer)
+            return await self.sync_from_untrusted_close_to_peak(new_peak_hb, difficulty_coeff, peer)
 
         # we haven't synced fully to this peer yet
         syncing = False
@@ -1240,11 +1243,13 @@ class WalletNode:
             self.long_sync(new_peak_hb.height, peer, 0, rollback=False)
         )
 
-    async def sync_from_untrusted_close_to_peak(self, new_peak_hb: HeaderBlock, peer: WSGoldConnection) -> bool:
+    async def sync_from_untrusted_close_to_peak(
+            self, new_peak_hb: HeaderBlock, difficulty_coeff: Decimal, peer: WSGoldConnection
+    ) -> bool:
         async with self.wallet_state_manager.lock:
             peak_hb = await self.wallet_state_manager.blockchain.get_peak_block()
             if peak_hb is None or new_peak_hb.weight > peak_hb.weight:
-                backtrack_fork_height: int = await self.wallet_short_sync_backtrack(new_peak_hb, peer)
+                backtrack_fork_height: int = await self.wallet_short_sync_backtrack(new_peak_hb, difficulty_coeff, peer)
             else:
                 backtrack_fork_height = new_peak_hb.height - 1
             fork_height = max(backtrack_fork_height, 0)
