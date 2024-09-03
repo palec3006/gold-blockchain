@@ -60,7 +60,7 @@ format_deb_version_string() {
 pip install j2cli
 CLI_DEB_BASE="gold-blockchain-cli_$GOLD_INSTALLER_VERSION-1_$PLATFORM"
 mkdir -p "dist/$CLI_DEB_BASE/opt/gold"
-mkdir -p "dist/$CLI_DEB_BASE/usr/bin"
+mkdir -p "dist/$CLI_DEB_BASE/usr/local/bin"
 mkdir -p "dist/$CLI_DEB_BASE/DEBIAN"
 mkdir -p "dist/$CLI_DEB_BASE/etc/systemd/system"
 GOLD_DEB_CONTROL_VERSION=$(format_deb_version_string "$GOLD_INSTALLER_VERSION")
@@ -69,7 +69,7 @@ j2 -o "dist/$CLI_DEB_BASE/DEBIAN/control" assets/deb/control.j2
 cp assets/systemd/*.service "dist/$CLI_DEB_BASE/etc/systemd/system/"
 cp -r dist/daemon/* "dist/$CLI_DEB_BASE/opt/gold/"
 
-ln -s ../../opt/gold/gold "dist/$CLI_DEB_BASE/usr/bin/gold"
+ln -s ../../../opt/gold/gold "dist/$CLI_DEB_BASE/usr/local/bin/gold"
 dpkg-deb --build --root-owner-group "dist/$CLI_DEB_BASE"
 # CLI only .deb done
 

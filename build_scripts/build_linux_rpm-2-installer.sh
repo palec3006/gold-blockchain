@@ -49,12 +49,12 @@ bash ./build_license_directory.sh
 # Builds CLI only rpm
 CLI_RPM_BASE="gold-blockchain-cli-$GOLD_INSTALLER_VERSION-1.$REDHAT_PLATFORM"
 mkdir -p "dist/$CLI_RPM_BASE/opt/gold"
-mkdir -p "dist/$CLI_RPM_BASE/usr/bin"
+mkdir -p "dist/$CLI_RPM_BASE/usr/local/bin"
 mkdir -p "dist/$CLI_RPM_BASE/etc/systemd/system"
 cp -r dist/daemon/* "dist/$CLI_RPM_BASE/opt/gold/"
 cp assets/systemd/*.service "dist/$CLI_RPM_BASE/etc/systemd/system/"
 
-ln -s ../../opt/gold/gold "dist/$CLI_RPM_BASE/usr/bin/gold"
+ln -s ../../../opt/gold/gold "dist/$CLI_RPM_BASE/usr/local/bin/gold"
 # This is built into the base build image
 # shellcheck disable=SC1091
 . /etc/profile.d/rvm.sh
