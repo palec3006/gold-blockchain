@@ -1775,7 +1775,7 @@ class WalletNode:
         start_height: Optional[uint32] = None,
         end_height: Optional[uint32] = None,
         max_items: Optional[uint32] = None,
-        is_group: bool = False,
+        is_group: bool = True,
     ) -> List[CoinRecord]:
         for peer in self.get_full_node_peers_in_order():
             response: Optional[RespondCoinRecords] = await peer.call_api(

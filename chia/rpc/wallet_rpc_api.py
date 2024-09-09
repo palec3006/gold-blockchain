@@ -4617,7 +4617,7 @@ class WalletRpcApi:
                             puzzle_hashes=list(puzzle_hashes_list.keys()),
                             include_spent_coins=True,
                             max_items=uint32(1),
-                            is_group=True
+                            is_group=False
                         )
                         if len(coin_records) > 0:
                             puzzle_hash, program_puzzle = puzzle_hashes_list[coin_records[0].coin.puzzle_hash]
@@ -4630,7 +4630,7 @@ class WalletRpcApi:
                         puzzle_hashes=list(puzzle_hashes_list.keys()),
                         include_spent_coins=True,
                         max_items=uint32(1),
-                        is_group=True
+                        is_group=False
                     )
                     if len(coin_records) > 0:
                         puzzle_hash, program_puzzle = puzzle_hashes_list[coin_records[0].coin.puzzle_hash]

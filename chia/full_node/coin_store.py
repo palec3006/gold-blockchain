@@ -669,31 +669,26 @@ class CoinStore:
         start_height: uint32 = uint32(0),
         end_height: uint32 = uint32((2 ** 32) - 1),
         max_items: int = 5000,
-        is_group: bool = False,
+        is_group: bool = True,
     ) -> List[CoinRecord]:
         if len(puzzle_hashes) == 0:
             return []
 
-        coins: Set[CoinRecord] = set()
+        coins = set()
+        puzzle_hashes_db: Tuple[Any, ...]
+        puzzle_hashes_db = tuple(puzzle_hashes)
         async with self.db_wrapper.reader_no_transaction() as conn:
-            for batch in to_batches(puzzle_hashes, SQLITE_MAX_VARIABLE_NUMBER):
-                puzzle_hashes_db: Tuple[Any, ...] = tuple(batch.entries)
-                async with conn.execute(
-                        f"SELECT confirmed_index, spent_index, coinbase, puzzle_hash, "
-                        f"coin_parent, amount, timestamp FROM coin_record INDEXED BY coin_puzzle_hash "
-                        f'WHERE puzzle_hash in ({"?," * (len(batch.entries) - 1)}?) '
-                        f"AND confirmed_index>=? AND confirmed_index<?"
-                        f"{'' if include_spent_coins else 'AND spent_index=0'}"
-                        f"{'' if is_group else ' GROUP BY puzzle_hash'}"
-                        " LIMIT ?",
-                        puzzle_hashes_db + (start_height, end_height, max_items - len(coins)),
-                ) as cursor:
-                    row: sqlite3.Row
-                    for row in await cursor.fetchall():
-                        coin = self.row_to_coin(row)
-                        coins.add(CoinRecord(coin, row[0], row[1], row[2], row[6]))
-
-                if len(coins) >= max_items:
-                    break
-
-        return list(coins)
+            async with conn.execute(
+                f"SELECT confirmed_index, spent_index, coinbase, puzzle_hash, "
+                f"coin_parent, amount, timestamp FROM coin_record INDEXED BY coin_puzzle_hash "
+                f'WHERE puzzle_hash in ({"?," * (len(puzzle_hashes) - 1)}?) '
+                f"AND confirmed_index>=? AND confirmed_index<?"
+                f"{'' if include_spent_coins else 'AND spent_index=0'}"
+                f"{'' if is_group else ' GROUP BY puzzle_hash'}"
+                " LIMIT ?",
+                puzzle_hashes_db + (start_height, end_height, max_items),
+            ) as cursor:
+                for row in await cursor.fetchall():
+                    coin = self.row_to_coin(row)
+                    coins.add(CoinRecord(coin, row[0], row[1], row[2], row[6]))
+                return list(coins)
