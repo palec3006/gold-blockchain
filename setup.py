@@ -13,7 +13,7 @@ dependencies = [
     "chiabip158==1.5.1",  # bip158-style wallet filters
     "chiapos==2.0.4",  # proof of space
     "clvm==0.9.10",
-    "clvm_tools==0.4.9",  # Currying, Program.to, other conveniences
+    "clvm_tools==0.4.10",  # Currying, Program.to, other conveniences
     "gold_rs==0.9.0",
     "chia-rs==0.9.0",
     "clvm-tools-rs==0.1.40",  # Rust implementation of clvm_tools' compiler
