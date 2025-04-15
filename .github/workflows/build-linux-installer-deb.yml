@@ -1,4 +1,4 @@
-name: Linux .deb installer on Python 3.8
+name: Linux .deb installer on Python 3.12
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name: Linux .deb installer on Python 3.8
+    name: Linux .deb installer on Python 3.12
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     strategy:
@@ -31,7 +31,7 @@ jobs:
         access_token: ${{ github.token }}
 
     - name: Checkout Code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
@@ -40,7 +40,7 @@ jobs:
       run: bash build_scripts/clean-runner.sh || true
 
     - name: Setup Python environment
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -91,19 +91,6 @@ jobs:
       env:
         SECRET: "${{ secrets.INSTALLER_UPLOAD_SECRET }}"
 
-      # Get the most recent release from chia-plotter-madmax
-    - uses: actions/github-script@v4
-      id: 'latest-madmax'
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        result-encoding: string
-        script: |
-          const releases = await github.repos.listReleases({
-            owner: 'Chia-Network',
-            repo: 'chia-plotter-madmax',
-          });
-          return releases.data[0].tag_name;
-
     - name: Run install script
       env:
         INSTALL_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -112,7 +99,7 @@ jobs:
         sh install.sh
 
     - name: Setup Node 12.x
-      uses: actions/setup-node@v2.4.1
+      uses: actions/setup-node@v4
       with:
         node-version: '12.x'
 
