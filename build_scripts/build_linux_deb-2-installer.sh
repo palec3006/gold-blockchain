@@ -20,7 +20,7 @@ git submodule
 
 if [ ! "$GOLD_INSTALLER_VERSION" ]; then
   echo "WARNING: No environment variable GOLD_INSTALLER_VERSION set. Using 0.0.0."
-  GOLD_INSTALLER_VERSION="0.0.0"
+  GOLD_INSTALLER_VERSION="2.0.1"
 fi
 echo "Gold Installer Version is: $GOLD_INSTALLER_VERSION"
 export GOLD_INSTALLER_VERSION
